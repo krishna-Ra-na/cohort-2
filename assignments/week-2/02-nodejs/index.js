@@ -21,6 +21,9 @@ function removeAtIndex(arr, index) {
   return newArray;
 }
 
+app.get("/", (req, res) => {
+  res.send("hi there");
+});
 app.get("/todos", (req, res) => {
   const todos = JSON.parse(fs.readFileSync("todos.json", "utf8"));
   res.json(todos);
