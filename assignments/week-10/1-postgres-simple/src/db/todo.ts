@@ -9,8 +9,18 @@ import { client } from "..";
  *  id: number
  * }
  */
-export async function createTodo(userId: number, title: string, description: string) {
-    
+export async function createTodo(
+  userId: number,
+  title: string,
+  description: string
+) {
+  const result = await client.query(
+    `INSERT INTO todos (user_id, title, description) 
+         VALUES ($1, $2, $3) 
+         RETURNING id, title, description, done`,
+    [userId, title, description]
+  );
+  return result.rows[0]; // Return the created todo object
 }
 /*
  * mark done as true for this specific todo.
@@ -23,7 +33,14 @@ export async function createTodo(userId: number, title: string, description: str
  * }
  */
 export async function updateTodo(todoId: number) {
-
+  const result = await client.query(
+    `UPDATE todos 
+         SET done = true 
+         WHERE id = $1 
+         RETURNING id, title, description, done`,
+    [todoId]
+  );
+  return result.rows[0]; // Return the updated todo object
 }
 
 /*
@@ -37,5 +54,11 @@ export async function updateTodo(todoId: number) {
  * }]
  */
 export async function getTodos(userId: number) {
-
+  const result = await client.query(
+    `SELECT id, title, description, done, user_id
+         FROM todos 
+         WHERE user_id = $1`,
+    [userId]
+  );
+  return result.rows; // Return the array of todos
 }
