@@ -1,17 +1,16 @@
-
 import express from "express";
 import { z } from "zod";
+import { prismaClient } from "./db";
 
 export const app = express();
 app.use(express.json());
-
 
 const sumInput = z.object({
     a: z.number(),
     b: z.number()
 })
-// @ts-ignore
-app.post("/sum", (req, res) => {
+
+app.post("/sum", async (req, res) => {
     const parsedResponse = sumInput.safeParse(req.body)
     
     if (!parsedResponse.success) {
@@ -22,13 +21,21 @@ app.post("/sum", (req, res) => {
 
     const answer = parsedResponse.data.a + parsedResponse.data.b;
 
+    const response = await prismaClient.sum.create({
+        data: {
+            a: parsedResponse.data.a,
+            b: parsedResponse.data.b,
+            result: answer
+        }
+    })
+
     res.json({
-        answer
+        answer,
+        id: response.id
     })
 });
 
-// @ts-ignore
-app.get("/sum", (req, res) => {
+app.get("/sum", async (req, res) => {
     const parsedResponse = sumInput.safeParse({
         a: Number(req.headers["a"]),
         b: Number(req.headers["b"])
@@ -42,7 +49,16 @@ app.get("/sum", (req, res) => {
 
     const answer = parsedResponse.data.a + parsedResponse.data.b;
 
+    const response = await prismaClient.sum.create({
+        data: {
+            a: parsedResponse.data.a,
+            b: parsedResponse.data.b,
+            result: answer
+        }
+    })
+
     res.json({
-        answer
+        answer,
+        id: response.id
     })
 });
